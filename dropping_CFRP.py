@@ -1,3 +1,13 @@
+"""
+Ultimaker Cura 3.4.1に対応．
+指定層の断面図を作成し，CFRPを埋め込みたい穴を指定，座標の算出，新gcodeファイルに自動組み込みする．
+穴の形状は長方形のみ対応しており，4頂点の座標から平均値を算出する．
+
+入力：gcodeディレクトリにgcodeファイルの拡張子をcsvに変更して格納．
+出力：new_gcodeディレクトリに格納．ファイル名の頭に"new"がつく．
+"""
+
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -10,25 +20,30 @@ class GetHoleCoordinate:
     gcode = pd.DataFrame()
     closest_X = []
     closest_Y = []
+    # hole_count = []
     
     def __init__(self, csv_file_name=-1, animation=-1, plot_marker=-1, layer=-1, holes=-1):
+        #指定gcodeファイルのファイル名．拡張子は.csvに変更しておく．
         self.csv_file_name = csv_file_name
+        #True or False．断面図を描く時にアニメーションをつけるかを選択．
         self.animation = animation
+        #True or False．断面図を描く時にマーカをつけるかを選択．
         self.plot_marker = plot_marker
+        #層の番号．算出した穴の座標を実際にファイルに埋め込む層を指定する．
         self.layer = layer
+        #穴の数．
         self.holes = holes
-        # self.hole_count = []
         # self.plot_3d = False
         
 
     def read_csv(self):
-        #gcodeの取り込み
+        #gcodeファイルの取り込み
         col_names = ['c{0:02d}'.format(i) for i in range(10)]
         return pd.read_csv('gcode/' + self.csv_file_name, sep='\s+', names=col_names)
     
 
     def cleaning_df(self, gcode):
-        #指定layerの抽出
+        #指定self.layerの座標を抽出
         num_first = gcode[gcode == ';LAYER:{}'.format(self.layer)].dropna(how='all').index[0]
         num_last = gcode[gcode == ';LAYER:{}'.format(self.layer + 1)].dropna(how='all').index[0]
         gcode = gcode[(gcode.index >= num_first) & (gcode.index < num_last)]
@@ -42,7 +57,7 @@ class GetHoleCoordinate:
 
     def make_original_gcode(self):
         """
-        出力：座標のみを取得し，データフレームを作製
+        出力：gcodeから座標のみを取得し，データフレームを作製
         """
         gcode = self.read_csv()
         gcode = self.cleaning_df(gcode)
@@ -163,7 +178,7 @@ class GetHoleCoordinate:
             self.find_hole(margin=0.4, df=self.drop_E_zero(self.gcode), x=event.xdata, y=event.ydata)
             plt.plot(float(self.closest_X[-1]), float(self.closest_Y[-1]), marker='o', color='red')
             plt.draw()
-            #4点が選択された後の処理（四角のみ対応）
+            #4点が選択された後の処理（長方形のみに対応）
             if len(self.closest_X) % 4 == 0 and len(self.closest_X) != 0 and len(self.closest_X) <= plots_dot_num:
                 plt.fill(self.closest_X[len(self.closest_X) - 4: len(self.closest_X)], self.closest_Y[len(self.closest_X) - 4: len(self.closest_X)], color='red', alpha=0.5)
                 hole_X = np.mean(self.closest_X[len(self.closest_X) - 4: len(self.closest_X)])
