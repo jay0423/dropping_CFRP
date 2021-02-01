@@ -6,15 +6,17 @@ import time
 
 
 class MAKE_POINT:
+
+    gcode = pd.DataFrame()
+    closest_X = []
+    closest_Y = []
+    
     def __init__(self, csv_file_name=-1, animation=-1, plot_marker=-1, layer=-1, holes=-1):
         self.csv_file_name = csv_file_name
         self.animation = animation
         self.plot_marker = plot_marker
         self.layer = layer
         self.holes = holes
-        self.gcode = 0
-        self.closest_X = []
-        self.closest_Y = []
         # self.hole_count = []
         # self.plot_3d = False
         
