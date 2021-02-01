@@ -5,7 +5,7 @@ from mpl_toolkits.mplot3d import Axes3D
 import time
 
 
-class MAKE_POINT:
+class GetHoleCoordinate:
 
     gcode = pd.DataFrame()
     closest_X = []
@@ -264,5 +264,5 @@ class MAKE_POINT:
 
 
 if __name__ == "__main__":
-    a = MAKE_POINT()
+    a = GetHoleCoordinate()
     a.main()
